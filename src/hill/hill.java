@@ -2,6 +2,10 @@ package hill;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class hill {
 
@@ -61,6 +65,42 @@ public class hill {
 
 		return ciphertext.toString();
 	}
-
 	
+	public static void main(String[] args) {
+		// 创建窗口
+		JFrame frame = new JFrame("加密");
+		frame.setSize(400, 140);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// 创建标签和文本框
+		JLabel keyLabel = new JLabel("加密内容:");
+		JTextField keyField = new JTextField(10);
+
+		// 创建按钮
+		JButton submitButton = new JButton("Submit");
+
+		// 为按钮添加事件监听器
+		submitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 读取用户输入的内容
+				String keyString = keyField.getText();
+
+				// 将密钥转换为字节
+				byte key = (byte) Integer.parseInt(keyString, 16);
+
+			}
+		});
+
+		// 将标签、文本框和按钮添加到窗口中
+		frame.add(keyLabel);
+		frame.add(keyField);
+		frame.add(submitButton);
+		
+		// 设置窗口布局
+		frame.setLayout(new FlowLayout());
+
+		// 显示窗口
+		frame.setVisible(true);
+	}
 }

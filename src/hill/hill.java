@@ -7,100 +7,97 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class hill {
+public class hill extends JFrame {
+	private static int[] plaintextFrequency = new int[26];
+	private static int[] ciphertextFrequency = new int[26];
 
-	public static String encryptCaesarCipher(String plaintext, int shift) {
-		StringBuilder ciphertext = new StringBuilder();
-		for (char c : plaintext.toCharArray()) {
-			if (Character.isLetter(c)) {
-				if (Character.isUpperCase(c)) {
-					int asciiValue = (int) c;
-					int newAsciiValue = ((asciiValue - 65 + shift) % 26) + 65;
-					char newChar = (char) newAsciiValue;
-					ciphertext.append(newChar);
-				} else {
-					int asciiValue = (int) c;
-					int newAsciiValue = ((asciiValue - 97 + shift) % 26) + 97;
-					char newChar = (char) newAsciiValue;
-					ciphertext.append(newChar);
-				}
-			} else {
-				ciphertext.append(c);
-			}
-		}
-		return ciphertext.toString();
-	}
+	private JLabel label;
+	private JTextField textField;
+	private JButton button;
 
-	private static final int BLOCK_SIZE = 3;
-	private static final int[][] KEY_MATRIX = { { 8, 3 }, { 2, 7 } };
+	public hill() {
+		setTitle("Hill Cipher");
+		setSize(400, 300);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(new FlowLayout());
 
-	public static String encryptHillCipher(String plaintext) {
-		List<Integer> plaintextVector = new ArrayList<>();
-		for (char c : plaintext.toCharArray()) {
-			plaintextVector.add((int) c - 97);
-		}
+		label = new JLabel("输入明文：");
+		add(label);
 
-		StringBuilder ciphertext = new StringBuilder();
-		while (plaintextVector.size() % BLOCK_SIZE != 0) {
-			plaintextVector.add(0);
-		}
+		textField = new JTextField(20);
+		add(textField);
 
-		for (int i = 0; i < plaintextVector.size(); i += BLOCK_SIZE) {
-			int[] block = new int[BLOCK_SIZE];
-			for (int j = 0; j < BLOCK_SIZE; j++) {
-				block[j] = plaintextVector.get(i + j);
-			}
+		button = new JButton("加密");
+		add(button);
 
-			int[] encryptedBlock = new int[BLOCK_SIZE];
-			for (int j = 0; j < BLOCK_SIZE; j++) {
-				for (int k = 0; k < BLOCK_SIZE; k++) {
-					encryptedBlock[j] += KEY_MATRIX[j][k] * block[k];
-				}
-			}
-
-			for (int j = 0; j < BLOCK_SIZE; j++) {
-				ciphertext.append((char) (encryptedBlock[j] % 26 + 97));
-			}
-		}
-
-		return ciphertext.toString();
-	}
-	
-	public static void main(String[] args) {
-		// 创建窗口
-		JFrame frame = new JFrame("加密");
-		frame.setSize(400, 140);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		// 创建标签和文本框
-		JLabel keyLabel = new JLabel("加密内容:");
-		JTextField keyField = new JTextField(10);
-
-		// 创建按钮
-		JButton submitButton = new JButton("Submit");
-
-		// 为按钮添加事件监听器
-		submitButton.addActionListener(new ActionListener() {
+		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// 读取用户输入的内容
-				String keyString = keyField.getText();
+				String plaintext = textField.getText().toUpperCase();
+				String ciphertext = hill.encrypt(plaintext);
+				JOptionPane.showMessageDialog(null, "密文：" + ciphertext);
 
-				// 将密钥转换为字节
-				byte key = (byte) Integer.parseInt(keyString, 16);
-
+				updateFrequency(plaintext, plaintextFrequency);
+				updateFrequency(ciphertext, ciphertextFrequency);
 			}
 		});
+	}
 
-		// 将标签、文本框和按钮添加到窗口中
-		frame.add(keyLabel);
-		frame.add(keyField);
-		frame.add(submitButton);
-		
-		// 设置窗口布局
-		frame.setLayout(new FlowLayout());
+	public static int[] getPlaintextFrequency() {
+		return plaintextFrequency;
+	}
 
-		// 显示窗口
+	public static int[] getCiphertextFrequency() {
+		return ciphertextFrequency;
+	}
+
+	private void updateFrequency(String text, int[] frequency) {
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			if (c >= 'A' && c <= 'Z') {
+				frequency[c - 'A']++;
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		hill frame = new hill();
 		frame.setVisible(true);
+	}
+
+	private static final int[][] KEY = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+
+	public static String encrypt(String plaintext) {
+		int len = plaintext.length();
+		int[][] matrix = new int[3][len / 3 + (len % 3 == 0 ? 0 : 1)];
+		int k = 0;
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[i].length; j++) {
+				if (k < len) {
+					matrix[i][j] = plaintext.charAt(k++) - 'A';
+				} else {
+					matrix[i][j] = 0;
+				}
+			}
+		}
+
+		int[][] result = new int[3][matrix[0].length];
+		for (int i = 0; i < result.length; i++) {
+			for (int j = 0; j < result[i].length; j++) {
+				for (int m = 0; m < 3; m++) {
+					result[i][j] += KEY[i][m] * matrix[m][j];
+				}
+				result[i][j] %= 26;
+			}
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < result.length; i++) {
+			for (int j = 0; j < result[i].length; j++) {
+				sb.append((char) (result[i][j] + 'A'));
+			}
+		}
+
+		return sb.toString();
 	}
 }

@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
-public class hill extends JFrame {
+public class caesar extends JFrame {
 	private static int[] plaintextFrequency = new int[26];
 	private static int[] ciphertextFrequency = new int[26];
 
@@ -35,8 +35,8 @@ public class hill extends JFrame {
 	    return sb.toString();
 	  }
 
-	public hill() {
-		setTitle("Hill Cipher");
+	public caesar() {
+		setTitle("Caesar Cipher");
 		setSize(400, 300);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new FlowLayout());
@@ -81,43 +81,20 @@ public class hill extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		hill frame = new hill();
+		caesar frame = new caesar();
 		frame.setVisible(true);
 	}
 
 	private static final int[][] KEY = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
 
 	public static String encrypt(String plaintext) {
-		int len = plaintext.length();
-		int[][] matrix = new int[3][len / 3 + (len % 3 == 0 ? 0 : 1)];
-		int k = 0;
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix[i].length; j++) {
-				if (k < len) {
-					matrix[i][j] = plaintext.charAt(k++) - 'A';
-				} else {
-					matrix[i][j] = 0;
-				}
-			}
-		}
+	    String message = plaintext;
+	    int key = 123;
+	    String encryptedMessage = "";
+	    for (char c : message.toCharArray()) {
+	      encryptedMessage += (char) (c + key);
+	    }
 
-		int[][] result = new int[3][matrix[0].length];
-		for (int i = 0; i < result.length; i++) {
-			for (int j = 0; j < result[i].length; j++) {
-				for (int m = 0; m < 3; m++) {
-					result[i][j] += KEY[i][m] * matrix[m][j];
-				}
-				result[i][j] %= 26;
-			}
-		}
-
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < result.length; i++) {
-			for (int j = 0; j < result[i].length; j++) {
-				sb.append((char) (result[i][j] + 'A'));
-			}
-		}
-
-		return sb.toString();
+		return encryptedMessage;
 	}
 }
